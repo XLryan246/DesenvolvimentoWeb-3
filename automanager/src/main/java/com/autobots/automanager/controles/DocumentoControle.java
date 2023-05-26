@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Documento;
-import com.autobots.automanager.modelo.cliente.ClienteAtualizador;
-import com.autobots.automanager.modelo.cliente.ClienteSelecionador;
 import com.autobots.automanager.modelo.documento.DocumentoAtualizador;
 import com.autobots.automanager.modelo.documento.DocumentoSelecionador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
