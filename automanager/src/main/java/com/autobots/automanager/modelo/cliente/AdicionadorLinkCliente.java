@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.autobots.automanager.controles.ClienteControle;
 import com.autobots.automanager.entidades.Cliente;
+import com.autobots.automanager.modelo.AdicionadorLink;
 
 @Component
 public class AdicionadorLinkCliente implements AdicionadorLink<Cliente> {

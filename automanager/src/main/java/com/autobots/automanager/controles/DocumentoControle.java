@@ -4,6 +4,8 @@ import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Documento;
+import com.autobots.automanager.modelo.documento.AdicionadorLinkDocumento;
 import com.autobots.automanager.modelo.documento.DocumentoAtualizador;
 import com.autobots.automanager.modelo.documento.DocumentoSelecionador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
@@ -27,19 +30,35 @@ public class DocumentoControle {
 	private DocumentoSelecionador selecionador;
 	@Autowired
 	private DocumentoRepositorio documentorepositorio;
-
+	@Autowired
+	private AdicionadorLinkDocumento adicionadorLink;
 	
 
 	@GetMapping("/documento/{id}")
-	public Documento obterDocumento(@PathVariable long id) {
+	public ResponseEntity<Documento> obterDocumento(@PathVariable long id) {
 		List<Documento> documentos = documentorepositorio.findAll();
-		return selecionador.selecionar(documentos, id);
+		Documento documento = selecionador.selecionar(documentos, id);
+		if (documento == null) {
+			ResponseEntity<Documento> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			adicionadorLink.adicionarLink(documento);
+			ResponseEntity<Documento> resposta = new ResponseEntity<Documento>(documento, HttpStatus.FOUND);
+			return resposta;
+		}
 	}
 
 	@GetMapping("/documentos")
-	public List<Documento> obterDocumentos() {
+	public ResponseEntity<List<Documento>> obterDocumentos() {
 		List<Documento> documentos = documentorepositorio.findAll();
-		return documentos;
+		if (documentos.isEmpty()) {
+			ResponseEntity<List<Documento>> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			adicionadorLink.adicionarLink(documentos);
+			ResponseEntity<List<Documento>> resposta = new ResponseEntity<>(documentos, HttpStatus.FOUND);
+			return resposta;
+		}
 	}
 
 	@PostMapping("/cadastrodocumento")

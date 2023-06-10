@@ -4,6 +4,8 @@ import java.util.List;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Endereco;
+import com.autobots.automanager.modelo.endereco.AdicionadorLinkEndereco;
 import com.autobots.automanager.modelo.endereco.EnderecoAtualizador;
 import com.autobots.automanager.modelo.endereco.EnderecoSelecionador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
@@ -27,19 +30,35 @@ public class EnderecoControle {
 	private EnderecoSelecionador selecionador;
 	@Autowired
 	private EnderecoRepositorio enderecorepositorio;
-
+	@Autowired
+	private AdicionadorLinkEndereco adicionadorLink;
 	
 
 	@GetMapping("/endereco/{id}")
-	public Endereco obterEndereco(@PathVariable long id) {
+	public ResponseEntity<Endereco> obterEndereco(@PathVariable long id) {
 		List<Endereco> enderecos = enderecorepositorio.findAll();
-		return selecionador.selecionar(enderecos, id);
+		Endereco endereco = selecionador.selecionar(enderecos, id);
+		if (endereco == null) {
+			ResponseEntity<Endereco> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			adicionadorLink.adicionarLink(endereco);
+			ResponseEntity<Endereco> resposta = new ResponseEntity<Endereco>(endereco, HttpStatus.FOUND);
+			return resposta;
+		}
 	}
 
 	@GetMapping("/enderecos")
-	public List<Endereco> obterEnderecos() {
+	public ResponseEntity<List<Endereco>> obterEnderecos() {
 		List<Endereco> enderecos = enderecorepositorio.findAll();
-		return enderecos;
+		if (enderecos.isEmpty()) {
+			ResponseEntity<List<Endereco>> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			adicionadorLink.adicionarLink(enderecos);
+			ResponseEntity<List<Endereco>> resposta = new ResponseEntity<>(enderecos, HttpStatus.FOUND);
+			return resposta;
+		}
 	}
 
 	@PostMapping("/cadastroendereco")
