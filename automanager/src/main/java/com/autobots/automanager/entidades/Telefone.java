@@ -1,6 +1,7 @@
 package com.autobots.automanager.entidades;
 
 import javax.persistence.Column;
+import javax.persistence.Embeddable;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,12 +15,15 @@ import lombok.Setter;
 @Getter
 @Setter
 @Entity
+@Embeddable
 public class Telefone extends RepresentationModel<Telefone> {
 	@Id()
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	@Column(nullable = false)
+	@Column
 	private String ddd;
-	@Column(nullable = false)
+	@Column
 	private String numero;
+	@Column
+	private Long clienteId;
 }

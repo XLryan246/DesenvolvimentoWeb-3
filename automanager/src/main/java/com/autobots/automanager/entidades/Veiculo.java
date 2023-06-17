@@ -13,19 +13,16 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 
-import org.springframework.hateoas.RepresentationModel;
-
 import com.autobots.automanager.enumeracoes.TipoVeiculo;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
-@Getter
-@Setter
-@EqualsAndHashCode(exclude = { "proprietario", "vendas" }, callSuper = false)
+@Data
+@EqualsAndHashCode(exclude = { "proprietario", "vendas" })
 @Entity
-public class Veiculo extends RepresentationModel<Veiculo> {
+public class Veiculo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -35,8 +32,10 @@ public class Veiculo extends RepresentationModel<Veiculo> {
 	private String modelo;
 	@Column(nullable = false)
 	private String placa;
+	@JsonIgnore
 	@ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
 	private Usuario proprietario;
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
+	@JsonIgnore
 	private Set<Venda> vendas = new HashSet<>();
 }
