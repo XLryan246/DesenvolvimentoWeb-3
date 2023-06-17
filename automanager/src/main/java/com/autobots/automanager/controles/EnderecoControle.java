@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Endereco;
+import com.autobots.automanager.modelo.cliente.ClienteSelecionador;
 import com.autobots.automanager.modelo.endereco.AdicionadorLinkEndereco;
 import com.autobots.automanager.modelo.endereco.EnderecoAtualizador;
 import com.autobots.automanager.modelo.endereco.EnderecoSelecionador;
@@ -32,7 +33,8 @@ public class EnderecoControle {
 	private EnderecoRepositorio enderecorepositorio;
 	@Autowired
 	private AdicionadorLinkEndereco adicionadorLink;
-	
+	@Autowired
+	private ClienteSelecionador selecionadorcliente;
 
 	@GetMapping("/endereco/{id}")
 	public ResponseEntity<Endereco> obterEndereco(@PathVariable long id) {
@@ -62,25 +64,54 @@ public class EnderecoControle {
 	}
 
 	@PostMapping("/cadastroendereco")
-	public void cadastrarCliente(@RequestBody Cliente cliente) {
-		Cliente cliente2 = repositorio.getById(cliente.getId());
-		cliente2.setEndereco(cliente.getEndereco());
-		repositorio.save(cliente2);
+	public ResponseEntity<?> cadastrarCliente(@RequestBody Cliente cliente) {
+		List<Cliente> clientes = repositorio.findAll();
+		Cliente clientezinho = selecionadorcliente.selecionar(clientes,cliente.getId());
+		if (clientezinho == null){
+			ResponseEntity<Endereco> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			Cliente cliente2 = repositorio.getById(cliente.getId());
+			cliente2.setEndereco(cliente.getEndereco());
+			repositorio.save(cliente2);
+			return ResponseEntity.ok(cliente2);
+		}
+
 	}
 
 	@PutMapping("/atualizarendereco")
-	public void atualizarendereco(@RequestBody Cliente atualizacao) {
-		Cliente cliente = repositorio.getById(atualizacao.getId());
-		EnderecoAtualizador atualizador = new EnderecoAtualizador();
-		atualizador.atualizar(cliente.getEndereco(), atualizacao.getEndereco());
-		repositorio.save(cliente);
+	public ResponseEntity<?> atualizarendereco(@RequestBody Cliente atualizacao) {
+		List<Cliente> clientes = repositorio.findAll();
+		Cliente clientezinho = selecionadorcliente.selecionar(clientes,atualizacao.getId());
+		if (clientezinho == null)
+		{
+			ResponseEntity<Endereco> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		}
+		else {
+			Cliente cliente = repositorio.getById(atualizacao.getId());
+			EnderecoAtualizador atualizador = new EnderecoAtualizador();
+			atualizador.atualizar(cliente.getEndereco(), atualizacao.getEndereco());
+			repositorio.save(cliente);
+			return ResponseEntity.ok(clientezinho);
+		}
+
 	}
 
 	@DeleteMapping("/excluirendereco/{id}")
-	public void excluirendereco(@PathVariable long id) {
-		Endereco endereco = enderecorepositorio.getById(id);
-		Cliente cliente = repositorio.findByDocumentosId(endereco.getId());
-		cliente.getEndereco().remove(endereco);
-		repositorio.save(cliente);
+	public ResponseEntity<Endereco> excluirendereco(@PathVariable long id) {
+		List<Endereco> enderecos = enderecorepositorio.findAll();
+		Endereco endereco = selecionador.selecionar(enderecos, id);
+		if (endereco == null) {
+			ResponseEntity<Endereco> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		}
+		else{
+			Endereco endereco2 = enderecorepositorio.getById(id);
+			Cliente cliente = repositorio.findByDocumentosId(endereco.getId());
+			cliente.getEndereco().remove(endereco);
+			repositorio.save(cliente);
+			return ResponseEntity.ok(endereco2);
+		}
 	}
  }

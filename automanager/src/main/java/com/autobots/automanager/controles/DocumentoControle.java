@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.autobots.automanager.entidades.Cliente;
 import com.autobots.automanager.entidades.Documento;
+import com.autobots.automanager.modelo.cliente.ClienteSelecionador;
 import com.autobots.automanager.modelo.documento.AdicionadorLinkDocumento;
 import com.autobots.automanager.modelo.documento.DocumentoAtualizador;
 import com.autobots.automanager.modelo.documento.DocumentoSelecionador;
 import com.autobots.automanager.repositorios.ClienteRepositorio;
 import com.autobots.automanager.repositorios.DocumentoRepositorio;
+
 
 @RestController
 public class DocumentoControle {
@@ -28,6 +30,8 @@ public class DocumentoControle {
 	private ClienteRepositorio repositorio;
 	@Autowired
 	private DocumentoSelecionador selecionador;
+	@Autowired
+	private ClienteSelecionador selecionadorcliente;
 	@Autowired
 	private DocumentoRepositorio documentorepositorio;
 	@Autowired
@@ -62,25 +66,53 @@ public class DocumentoControle {
 	}
 
 	@PostMapping("/cadastrodocumento")
-	public void cadastrarCliente(@RequestBody Cliente cliente) {
-		Cliente cliente2 = repositorio.getById(cliente.getId());
-		cliente2.getDocumentos().addAll(cliente.getDocumentos());
-		repositorio.save(cliente2);
+	public ResponseEntity<?> cadastrarDocumento(@RequestBody Cliente cliente) {
+		List<Cliente> clientes = repositorio.findAll();
+		Cliente clientezinho = selecionadorcliente.selecionar(clientes,cliente.getId());
+		if (clientezinho == null){
+			ResponseEntity<Documento> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		} else {
+			Cliente cliente2 = repositorio.getById(cliente.getId());
+			cliente2.getDocumentos().addAll(cliente.getDocumentos());
+			repositorio.save(cliente2);
+			return ResponseEntity.ok(cliente2);
+		}
 	}
 
 	@PutMapping("/atualizardocumento")
-	public void atualizardocumento(@RequestBody Cliente atualizacao) {
+	public ResponseEntity<?> atualizardocumento(@RequestBody Cliente atualizacao) {
+		List<Cliente> clientes = repositorio.findAll();
+		Cliente clientezinho = selecionadorcliente.selecionar(clientes,atualizacao.getId());
+		if (clientezinho == null ) 
+		{
+			ResponseEntity<Documento> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		}
+		else {
 		Cliente cliente = repositorio.getById(atualizacao.getId());
 		DocumentoAtualizador atualizador = new DocumentoAtualizador();
 		atualizador.atualizar(cliente.getDocumentos(), atualizacao.getDocumentos());
 		repositorio.save(cliente);
+		return ResponseEntity.ok(clientezinho);
+		}
 	}
 
 	@DeleteMapping("/excluirdocumento/{id}")
-	public void excluirdocumento(@PathVariable long id) {
-		Documento documento = documentorepositorio.getById(id);
-		Cliente cliente = repositorio.findByDocumentosId(documento.getId());
-		cliente.getDocumentos().remove(documento);
-		repositorio.save(cliente);
+	public ResponseEntity<Documento> excluirdocumento(@PathVariable long id) {
+		List<Documento> documentos = documentorepositorio.findAll();
+		Documento documento = selecionador.selecionar(documentos, id);
+		if (documento == null){
+			ResponseEntity<Documento> resposta = new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			return resposta;
+		}
+		else{
+			Documento documento2 = documentorepositorio.getById(id);
+			Cliente cliente = repositorio.findByDocumentosId(documento.getId());
+			cliente.getDocumentos().remove(documento);
+			repositorio.save(cliente);
+			return ResponseEntity.ok(documento2);
+		}
+
 	}
  }

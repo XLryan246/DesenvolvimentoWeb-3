@@ -13,26 +13,27 @@ import com.autobots.automanager.modelo.AdicionadorLink;
 @Component
 public class AdicionadorLinkTelefone implements AdicionadorLink<Telefone> {
 
-	@Override
-	public void adicionarLink(List<Telefone> lista) {
-		for (Telefone telefone : lista) {
-			long id = telefone.getId();
-			Link linkProprio = WebMvcLinkBuilder
-					.linkTo(WebMvcLinkBuilder
-							.methodOn(TelefoneControle.class)
-							.obterTelefone(id))
-					.withSelfRel();
-			telefone.add(linkProprio);
-		}
-	}
+    @Override
+    public void adicionarLink(List<Telefone> lista) {
+        for (Telefone endereco : lista) {
+            long id = endereco.getId();
+            Link linkProprio = WebMvcLinkBuilder
+                    .linkTo(WebMvcLinkBuilder
+                            .methodOn(TelefoneControle.class)
+                            .obterTelefone(id))
+                    .withSelfRel();
+            endereco.add(linkProprio);
 
-	@Override
-	public void adicionarLink(Telefone objeto) {
-		Link linkProprio = WebMvcLinkBuilder
-				.linkTo(WebMvcLinkBuilder
-						.methodOn(TelefoneControle.class)
-						.obterTelefones())
-				.withRel("telefones");
-		objeto.add(linkProprio);
-	}
+        }
+    }
+
+    @Override
+    public void adicionarLink(Telefone objeto) {
+        Link linkProprio = WebMvcLinkBuilder
+                .linkTo(WebMvcLinkBuilder
+                        .methodOn(TelefoneControle.class)
+                        .obterTelefones())
+                .withRel("telefones");
+        objeto.add(linkProprio);
+    }
 }
