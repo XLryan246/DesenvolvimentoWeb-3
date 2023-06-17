@@ -6,4 +6,3 @@ import com.autobots.automanager.entidades.Documento;
 
 public interface DocumentoRepositorio extends JpaRepository<Documento, Long> {
 }
-
